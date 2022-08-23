@@ -74,7 +74,7 @@
     $args = array(
       'labels' => $labels, 
       'hierarchical' => true,
-      'description' => 'SLideshows',
+      'description' => 'Slideshows',
       'supports' => array('title', 'editor'),
       'public' => true,
       'show_ui' => true,
@@ -92,10 +92,10 @@
     register_post_type( 'slidesjs_slider', $args );
   }
 
-  add_action( 'add_meta_boxes', 'fwds_sider_meta_box' );
+  add_action( 'add_meta_boxes', 'fwds_slider_meta_box' );
 
   function fwds_slider_meta_box() {
-    add_meta_box("fwds-slider-image","Slider Images",'fwds_view_images_box',"slidesjs_slider","normal" );
+    add_meta_box("fwds-slider-image","Slider Images",'fwds_view_slider_images_box',"slidesjs_slider","normal" );
 
   }
 
@@ -107,6 +107,34 @@
     
     // Use nonce for verification
     $html = '<input type="hidden" name="fwds_slider_box_nonce" value="'.wp_create_nonce( basename(__FILE__) ). '" />';
+    // $html .= '';
+    $html .= '
+      <table class="form-table">
+        <tbody>
+          <tr>
+            <th><label for="Upload Images">Image 1</label></th>
+            <td><input id="fwds_slider_upload" type="text" name="gallery_img[]" value="'.$gallery_images[0].'" /></td>
+          </tr>
+          <tr>
+            <th><label for="Upload Images">Image 2</label></th>
+            <td><input id="fwds_slider_upload" type="text" name="gallery_img[]" value="'.$gallery_images[1].'" /></td>
+          </tr>
+          <tr>
+            <th><label for="Upload Images">Image 3</label></th>
+            <td><input id="fwds_slider_upload" type="text" name="gallery_img[]" value="'.$gallery_images[2].'" /></td>
+          </tr>
+          <tr>
+            <th><label for="Upload Images">Image 4</label></th>
+            <td><input id="fwds_slider_upload" type="text" name="gallery_img[]" value="'.$gallery_images[3].'" /></td>
+          </tr>
+          <tr>
+            <th><label for="Upload Images">Image 5</label></th>
+            <td><input id="fwds_slider_upload" type="text" name="gallery_img[]" value="'.$gallery_images[4].'" /></td>
+          </tr>
+        </tbody>
+    ';
+
+    echo $html;
 
 
 
