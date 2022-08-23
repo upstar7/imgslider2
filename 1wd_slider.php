@@ -32,6 +32,20 @@
     wp_register_script('slidesjs_init', plugins_url('js/slidesjs.initialize.js', __FILE__));
     wp_enqueue_script('slidesjs_init');
 
+    $effect = (get_option('fwds_effect') == '') ? "slide" : get_option('fwds_effect');
+    $interval = (get_option('fwds_interval') == '') ? 2000 : get_option('fwds_interval');
+    $autoplay = (get_option('fwds_autoplay') == 'enabled') ? true : false;
+    $playBtn = (get_option('fwds_playBtn') == 'enabled') ? true : false;
+
+    $config_array = array(
+      'effect' => $effect,
+      'interval' => $interval,
+      'autoplay' => $autoplay,
+      'playBtn' => $playBtn
+    );
+
+    wp_localize_script('slidesjs_init', 'setting', $config_array);
+
   }
 
 
