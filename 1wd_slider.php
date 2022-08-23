@@ -95,7 +95,7 @@
   add_action( 'add_meta_boxes', 'fwds_slider_meta_box' );
 
   function fwds_slider_meta_box() {
-    add_meta_box("fwds-slider-image","Slider Images",'fwds_view_slider_images_box',"slidesjs_slider","normal" );
+    add_meta_box("fwds-slider-images","Slider Images",'fwds_view_slider_images_box',"slidesjs_slider","normal" );
 
   }
 
@@ -105,10 +105,11 @@
     //print_r($gallerry_images); exit;
     $gallery_images = ($gallery_images != '') ? json_decode( $gallery_images ) : array();
     
+    // echo ($gallery_images);
     // Use nonce for verification
-    $html = '<input type="hidden" name="fwds_slider_box_nonce" value="'.wp_create_nonce( basename(__FILE__) ). '" />';
+    // $html = '<input type="hidden" name="fwds_slider_box_nonce" value="'.wp_create_nonce( basename(__FILE__) ). '" />';
     // $html .= '';
-    $html .= '
+    $html = '
       <table class="form-table">
         <tbody>
           <tr>
@@ -132,6 +133,7 @@
             <td><input id="fwds_slider_upload" type="text" name="gallery_img[]" value="'.$gallery_images[4].'" /></td>
           </tr>
         </tbody>
+      </table>  
     ';
 
     echo $html;
