@@ -45,23 +45,6 @@
 
   }
 
-  add_shortcode("1wd_slider", "fwds_display_slider");
-  function fwds_display_slider() {
-
-    $plugins_url = plugins_url();
-  
-
-    echo '<div class="container">
-      <div id="slides">
-        <img src="'.plugins_url( 'img/example-slide-1.jpg' , __FILE__ ).'" />
-        <img src="'.plugins_url( 'img/example-slide-2.jpg' , __FILE__ ).'" />
-        <img src="'.plugins_url( 'img/example-slide-3.jpg' , __FILE__ ).'" />
-        <img src="'.plugins_url( 'img/example-slide-4.jpg' , __FILE__ ).'" />
-        <a href="#" class="slidesjs-previous slidesjs-navigation"><i class="icon-chevron-left icon-large"></i></a>
-        <a href="#" class="slidesjs-next slidesjs-navigation"><i class="icon-chevron-right icon-large"></i></a>
-      </div>
-    </div>';
-  }
 
   add_action('init', 'fwds_register_slider');
 
@@ -135,41 +118,136 @@
         </tbody>
       </table>  
     ';
-
     echo $html;
+  }
 
-    add_action('save_post', 'fwds_save_slider_info');
-    
-    function fwds_save_slider_info($post_id) {
-      //verify nonce
+  add_action('save_post', 'fwds_save_slider_info');
+  
+  function fwds_save_slider_info($post_id) {
+    //verify nonce
 
-      if (!wp_verify_nonce($_POST['fwds_slider_box_nonce'], basename(__FILE__))) {
-        return $post_id;
-      }
-
-      //check autosave
-      if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-        return $post_id;
-      }
-
-      //check permission
-
-      if ( 'slidesjs_slider' == $_POST['post_type'] && current_user_can('edit_post', $post_id) ) {
-        // Save Slider Images
-        //print_r($_POST['gallery_img']);exit;
-
-        $gallery_images = (isset($_POST['gallery_img']) ? $POST_['gallery_img'] : '');
-
-        $gallery_images = strip_tags(json_decode( $gallery_images ));
-
-        update_post_meta($post_id, "_fwds_gallery_images", $gallery_images );
-      
-      } else {
-        return $post_id;
-      }
+    if (!wp_verify_nonce($_POST['fwds_slider_box_nonce'], basename(__FILE__))) {
+      return $post_id;
     }
 
+    //check autosave
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+      return $post_id;
+    }
+
+    //check permission
+
+    if ( 'slidesjs_slider' == $_POST['post_type'] && current_user_can('edit_post', $post_id) ) {
+      // Save Slider Images
+      //print_r($_POST['gallery_img']);exit;
+
+      $gallery_images = (isset($_POST['gallery_img']) ? $POST_['gallery_img'] : '');
+
+      $gallery_images = strip_tags(json_decode( $gallery_images ));
+
+      update_post_meta($post_id, "_fwds_gallery_images", $gallery_images );
+    
+    } else {
+      return $post_id;
+    }
   }
+  
+  add_shortcode( "1wd_slider", "fwds_display_slider" );
+
+  function fwds_display_slider($attr, $content) {
+    
+    extract(shortcode_atts(array(
+      'id' => ''
+    ), $attr));
+
+    $gallery_images = get_post_meta( $id, "_fwds_gallery_images", true );
+
+    $gallery_images = ($gallery_images != '') ? json_decode($gallery_images) : array();
+
+    $plugins_url = plugins_url();
+
+    $html = '
+      <div class="container">
+        <div id="slides">
+    ';
+
+    foreach ($gallery_images as $gal_img) {
+      # code...
+      if ($gal_img != "") {
+
+        $html .= '<img alt="" src="'.$gal_img.'" />';
+      
+      }
+    }
+    $html .='
+        </div>
+      </div>
+    ';
+
+    return $html;
+  }
+
+  //Creating The Admin Menu Page for Plugin Settings
+  add_action( 'admin_menu', 'fwds_plugin_settings' );
+
+  function fwds_plugin_settings() {
+    add_menu_page( '1stWD Slider Settings', '1stWD Slider Settings', 'administrator', 'fwds_settings', 'fwds_display_settings' );
+  }
+  
+  function fwds_display_settings() {
+    
+    $slide_effect = (get_option('fwds_effect') == 'slide') ? 'selected' : '';
+
+    $fade_effect = (get_option('fwds_effect') == 'fade') ? 'selected' : '';
+
+    $interval = (get_option('fwds_interval') != '') ? get_option('fwds_interval') : '2000';
+
+    $autoplay = (get_option('fwds_autoplay') == 'enabled') ? 'checked' : '';
+
+    $playBtn = (get_option('fwds_playBtn') == 'enabled') ? 'checked' : '';
+
+    $html = '
+      <div class= "wrap">
+        <form action="option.php" method="post" name="options">
+          <h2>Select Your Settings</h2>
+          ' .wp_nonce_field('update-options') . '
+          <table class="form-table" width="100%" cellpadding="10">
+            <tbody>
+              <tr>
+                <td scope="row" align="left">
+                  <label>Slider Effect</label>
+                  <select name="fwds_effect">
+                    <option value="slide">Slide</option>
+                    <option value="fade">Fade</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td scope="row" align="left">
+                  <label>Enable Play Button</label>
+                  <input type="checkbox" name="fwds_playBtn" value="enabled" />
+                </td>
+              </tr>
+              <tr>
+                <td scope="row" align="left">
+                  <label>Transition Interval</label>
+                  <input type="text" name="fwds_interval" value="' . $interval . '" />
+                </td>
+              </tr>
+            </tbody>
+          </table> 
+          <input type="hidden" name="action" value="update" />
+
+          <input type="hidden" name="page_options" value="fwds_autoplay, fwds_effect, fwds_interval, fwds_playBtn" />
+
+          <input type="submit" name="submit" value="Update" />
+        </form>
+      </div>  
+      ';
+    echo $html;  
+
+  }
+
 
 
 
