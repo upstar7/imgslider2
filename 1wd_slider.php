@@ -107,7 +107,7 @@
     
     // echo ($gallery_images);
     // Use nonce for verification
-    // $html = '<input type="hidden" name="fwds_slider_box_nonce" value="'.wp_create_nonce( basename(__FILE__) ). '" />';
+    $html = '<input type="hidden" name="fwds_slider_box_nonce" value="'.wp_create_nonce( basename(__FILE__) ). '" />';
     // $html .= '';
     $html = '
       <table class="form-table">
@@ -138,10 +138,42 @@
 
     echo $html;
 
+    add_action('save_post', 'fwds_save_slider_info');
+    
+    function fwds_save_slider_info($post_id) {
+      //verify nonce
 
+      if (!wp_verify_nonce($_POST['fwds_slider_box_nonce'], basename(__FILE__))) {
+        return $post_id;
+      }
 
+      //check autosave
+      if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return $post_id;
+      }
+
+      //check permission
+
+      if ( 'slidesjs_slider' == $_POST['post_type'] && current_user_can('edit_post', $post_id) ) {
+        // Save Slider Images
+        //print_r($_POST['gallery_img']);exit;
+
+        $gallery_images = (isset($_POST['gallery_img']) ? $POST_['gallery_img'] : '');
+
+        $gallery_images = strip_tags(json_decode( $gallery_images ));
+
+        update_post_meta($post_id, "_fwds_gallery_images", $gallery_images );
+      
+      } else {
+        return $post_id;
+      }
+    }
 
   }
+
+
+
+
 
 
 ?>
